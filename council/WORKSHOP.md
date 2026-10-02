@@ -78,6 +78,10 @@ minutes there will be an AI version of you that votes in public. No pressure.
 The delegates vote yes or no. Then the chair decides. The chair is the only one who has read the
 rules, which makes it different from most meetings.
 
+*(Show the picture `how-it-works.png` full screen and walk through the four numbers.)*
+
+![How one session of the Green Council works](how-it-works.png)
+
 How one session works, in four lines:
 
 1. You type a proposal.

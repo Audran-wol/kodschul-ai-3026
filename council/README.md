@@ -4,6 +4,8 @@ A council chamber in the browser. You put a proposal for the city, for example
 "Ban cars from the city centre on weekends". Every delegate is an AI agent with a name, a role and
 a character. They vote YES or NO, and the chair decides by the council charter.
 
+![How one session of the Green Council works](how-it-works.png)
+
 ```text
 page (index.html) → backend (server.py) → CouncilChair ── knowledge base: council-charter.md
                                                        ── API tool: live air quality (OpenAPI)
