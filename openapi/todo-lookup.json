@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "TodoLookup",
+    "description": "Look up one todo item by its id. Demo API (JSONPlaceholder), read-only.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://jsonplaceholder.typicode.com" }
+  ],
+  "paths": {
+    "/todos/{id}": {
+      "get": {
+        "operationId": "getTodoById",
+        "summary": "Get one todo item: its title and whether it is completed.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The number of the todo item, from 1 to 200.",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The todo item.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userId": { "type": "integer" },
+                    "id": { "type": "integer" },
+                    "title": { "type": "string" },
+                    "completed": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

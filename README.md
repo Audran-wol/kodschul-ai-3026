@@ -1,0 +1,113 @@
+# AI-3026 — Develop AI Agents on Azure: seminar files
+
+The files used in the live demos and labs of the seminar. The example company is Kodschul, a training provider.
+
+## Folders
+
+| Folder       | File                                  | What it is                                                     | Slide section      |
+| ------------ | ------------------------------------- | -------------------------------------------------------------- | ------------------ |
+| `agent/`     | `kodschul-assistant.md`               | Instructions and test questions for `KodschulAssistant`        | 01 Agent           |
+| `knowledge/` | `kodschul_agent_knowledge_source.pdf` | Knowledge file: facts the agent searches (upload to Foundry IQ) | 02 Knowledge       |
+| `skills/`    | `support-reply/SKILL.md`              | Skill file: steps for one task (attach to a toolbox, preview)  | Knowledge vs skill |
+| `openapi/`   | `todo-lookup.json`                    | OpenAPI definition of the demo tool `TodoLookup`               | 03 Tools, 04 MCP   |
+| `code/`      | `run_agent.py`                        | Call an existing agent from Python and print every step        | 05 Code            |
+| `code/`      | `approval_demo.py`                    | Human approval of an MCP tool call in your own code            | 05 Code            |
+| `code/`      | `a2a_lab.py`                          | Build two agents that talk over A2A, then test them            | 06 Multi-Agent     |
+
+## Setup (once per machine)
+
+1. Install Python 3.11 or newer: `winget install Python.Python.3.12`
+2. Install the Azure CLI: `winget install Microsoft.AzureCLI`
+3. Sign in: `az login`
+4. Install the packages: `pip install azure-ai-projects azure-identity openai`
+
+macOS: `brew install python azure-cli`
+
+### Sign in
+
+- `az login` opens a sign-in window. Choose your lab account under "Work or school account".
+- Wrong tenant, or "no subscription found": `az login --tenant <tenant-id>`
+- Where the tenant ID is: Azure Portal → Microsoft Entra ID → Overview → Tenant ID
+- When you are already signed in: `az account show --query tenantId -o tsv`
+
+### Project endpoint
+
+Each script has `PROJECT_ENDPOINT` at the top. Find your value in the Foundry portal:
+your project → Overview → Project endpoint.
+
+## Knowledge file or skill?
+
+| File           | Contains                            | The agent uses it to answer | Example                         |
+| -------------- | ----------------------------------- | --------------------------- | ------------------------------- |
+| Knowledge file | Facts: services, policies, manuals  | "What is true?"             | `knowledge/*.pdf`               |
+| Skill          | Steps for one task (`SKILL.md`)     | "How do we do this?"        | `skills/support-reply/SKILL.md` |
+
+Skills in Microsoft Foundry are in preview.
+
+## A2A lab
+
+1. Open `code/a2a_lab.py` and set `PROJECT_ENDPOINT` and `MODEL` at the top.
+   `MODEL` is the name of a model deployment in your project.
+2. Run it:
+
+```text
+cd code
+python a2a_lab.py
+```
+
+### The test case
+
+- `FrontDeskAgent` talks to the user. It has no project facts. It has one tool: A2A to the specialist.
+- `ProjectSpecialist` is the only agent that knows the project facts, for example
+  "Project Alpha: deployed to staging on Monday".
+- The question: "What is the deployment status of Project Alpha?"
+- A correct answer can only come from the specialist. That is the proof that A2A worked.
+
+### Expected output
+
+```text
+OK   1. create the specialist agent
+OK   2. enable incoming A2A on the specialist
+OK   3. create the A2A connection
+OK   4. create the front desk agent with the A2A tool
+
+QUESTION to FrontDeskAgent: What is the deployment status of Project Alpha?
+STEP: a2a_preview_call: ...
+STEP: a2a_preview_call_output: Project Alpha was deployed to staging on Monday. ...
+
+ANSWER: Project Alpha was deployed to staging on Monday. ...
+```
+
+| Step | What it creates                                                        |
+| ---- | ---------------------------------------------------------------------- |
+| 1    | The specialist agent with the project facts                            |
+| 2    | The agent card and the A2A endpoint of the specialist                  |
+| 3    | The connection: where the specialist lives and which identity calls it |
+| 4    | The front desk agent with the A2A tool                                 |
+
+### If something goes wrong
+
+- A step fails: the script prints the step name and the error.
+- No `a2a_preview_call` line: the front desk agent answered alone. Check its instructions.
+- The model does not support A2A: try another model deployment in the `MODEL` line.
+
+## Call an agent from Python
+
+Set `PROJECT_ENDPOINT` at the top of `code/run_agent.py`, then:
+
+```text
+cd code
+python run_agent.py
+python run_agent.py "What is the status of Project Beta?"
+python run_agent.py "Hello" ProjectSpecialist
+```
+
+## Human approval in your own code
+
+`code/approval_demo.py` works with any agent that has an MCP tool requiring approval.
+
+```text
+python approval_demo.py "your question" AgentName
+```
+
+The script shows the tool and its arguments, asks `Approve? [y/n]`, and sends your decision back to the agent.
