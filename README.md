@@ -2,6 +2,8 @@
 
 The files used in the live demos and labs of the seminar. The example company is Kodschul, a training provider.
 
+New here? Start with the short command guide: [OVERVIEW.md](OVERVIEW.md)
+
 ## Folders
 
 | Folder       | File                                  | What it is                                                     | Slide section      |
