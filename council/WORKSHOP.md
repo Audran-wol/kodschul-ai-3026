@@ -39,6 +39,14 @@ minutes there will be an AI version of you that votes in public. No pressure.
 The delegates vote yes or no. Then the chair decides. The chair is the only one who has read the
 rules, which makes it different from most meetings.
 
+How one session works, in four lines:
+
+1. You type a proposal.
+2. The chair sends it to every delegate. Each delegate judges it from its own role and answers
+   `VOTE: YES` or `VOTE: NO` with a short reason. They do not see each other's votes.
+3. The chair looks up the live air quality and reads the council rules.
+4. The chair counts the votes, applies the rules, and announces: adopted or rejected.
+
 *(Show the finished page for one minute, so everybody sees where we are going.)*
 
 Here is what the council needs. Remember this list, we tick it off one by one:
@@ -362,12 +370,66 @@ room, talking to itself. We have all been in that meeting.
 
 ## 8. A2A — the chair asks the delegates
 
-The delegates exist. The chair exists. They cannot talk to each other. For that we need three
-small things, and this is the part that cost me a whole night, so today you get it in one prompt.
+The delegates exist. The chair exists. But they cannot talk to each other. Before we connect
+them, let me explain what happens, because this is the heart of the whole system.
 
-1. Each delegate publishes a little card that says "I exist, and here is what I do".
-2. A **connection** from the chair to each delegate.
-3. An **A2A tool** on the chair for each connection.
+### What agent-to-agent means
+
+Until now, every agent we built talked to a person. You ask, it answers. **A2A** means an agent
+talks to another agent. One agent sends a message, the other agent does its work and sends the
+answer back. No person in between.
+
+Think of a real council. The chair does not know everything. The chair does not have to. The
+chair knows **who to ask**. That is the idea: instead of one agent that tries to be a scientist,
+an engineer and an accountant at the same time, we have one agent per job, and one that
+coordinates.
+
+A2A is a standard, like a common language. Any agent that speaks A2A can be called by any other
+agent that speaks A2A. It does not matter who built it or where it runs. Today all our agents
+live in my project, but the delegate could just as well live in another company.
+
+### What the delegates do
+
+Each delegate is a small, simple agent. Here is its whole job:
+
+1. It **receives** the proposal from the chair, as an A2A message.
+2. It **judges** the proposal from its own role only. The business owner thinks about shops.
+   The scientist thinks about data. They do not try to be fair. That is the chair's job.
+3. It **answers** in a fixed format: first `VOTE: YES` or `VOTE: NO`, then one or two sentences
+   with the reason.
+
+Three things a delegate does **not** have:
+
+- It has **no knowledge base**. It has not read the charter. It only has its character.
+- It has **no tools**. It cannot look up the air quality. Only the chair can.
+- It does **not see the other delegates**. Nobody copies a neighbour. Every vote is independent.
+
+Why the fixed format? Because the chair, and later our web page, must be able to count. If one
+delegate writes a poem instead of YES or NO, we cannot count it. A fixed format turns an opinion
+into data.
+
+### What the chair does with the votes
+
+1. It gets the live air quality (the tool).
+2. It sends the proposal to **every** delegate, one A2A call each.
+3. It reads the charter (the knowledge base).
+4. It counts the votes and applies the rules. On a tie, or when a rule says so, the chair decides.
+
+So the delegates give opinions, and the chair gives the decision. Opinions come from
+instructions. The decision comes from knowledge. That is the difference between the two, in one
+system.
+
+### What we need to build for it
+
+Three small things, and this is the part that cost me a whole night, so today you get it in one
+prompt.
+
+1. **An agent card.** Each delegate publishes a little card that says "I exist, and here is what
+   I can do: I vote on proposals". The chair reads the card to know the delegate.
+2. **A connection** from the chair to each delegate. It stores the address of the delegate and
+   which identity is used to call it. Today that identity is my own login.
+3. **An A2A tool** on the chair, one per connection. For the chair, a delegate is just another
+   tool it can call, like the air quality API.
 
 **Tell the coding agent**
 
@@ -417,6 +479,10 @@ python scripts/ask.py CouncilChair "<the first proposal>"
 Count the steps. One `file_search_call`. One `openapi_call`. And one `a2a` step for each of you.
 The chair asked every delegate, each delegate answered in character, and the chair decided by
 the charter.
+
+Look at one `a2a` step closely. You see two parts. The **call**: the message the chair sent,
+which is our proposal. And the **output**: what the delegate answered, starting with `VOTE:`.
+That pair is one agent-to-agent conversation. We have one pair per delegate.
 
 That is five different ideas from today in one answer. And nobody wrote a line of code by hand.
 
