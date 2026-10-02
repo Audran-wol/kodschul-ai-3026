@@ -1,387 +1,510 @@
-# Green Council — the live build, in one file
+# Green Council — we build it together
 
-Read this file from top to bottom. It has everything: what to say, who in the room gives what,
-and every prompt to paste into your coding agent (Claude Code, Codex, GitHub Copilot in Agent
-mode, or ChatGPT with a terminal).
+This is the script for the live build. Read it from top to bottom.
 
-- `SAY:` words for the trainer.
-- `ASK:` a question to a participant. Their answer becomes part of the project.
-- `DO:` what the trainer does.
-- `PROMPT:` copy the box and paste it into the coding agent.
-- `EXPECT:` what you should see before you go on.
+How it works: we build one small piece, we test it, we understand it, then the next piece.
+The room gives the content. The coding agent writes the code. Nobody types code by hand.
 
-If a step fails and you have no time, the finished files are next to this one:
-`setup_council.py` (steps 1 to 4) and `server.py`, `index.html` (steps 5 and 6).
+Three kinds of boxes:
 
----
+- **Run** — a command for the terminal.
+- **Paste into the file** — what the room gives us goes into a file in VS Code.
+- **Tell the coding agent** — a prompt to copy into Claude Code, Codex, Copilot (Agent mode) or ChatGPT.
 
-## Who gives what
+Who gives what (fill in the names before you start):
 
-Every participant owns one piece of the system. Write the names in before you start.
-
-| Piece                                  | Seminar topic        | Given by    |
-| -------------------------------------- | -------------------- | ----------- |
-| Their own delegate: role and character | Instructions         | everyone    |
-| The chair's style                      | Instructions         | [VOLUNTEER-INSTRUCTIONS] |
-| The rules of the council (the charter) | Knowledge base       | [VOLUNTEER-KNOWLEDGE]    |
-| The city and the live data             | Tool (API)           | [VOLUNTEER-API]          |
-| Three proposals to test with           | Testing              | [VOLUNTEER-TEST]         |
-| Two wishes for the look of the page    | Code / UI            | [VOLUNTEER-DESIGN]       |
-| Runs the prompts                       | Everything           | the trainer |
+| Piece                         | Given by                 |
+| ----------------------------- | ------------------------ |
+| A delegate with a character   | everyone                 |
+| The rules of the council      | [VOLUNTEER-KNOWLEDGE]    |
+| How the chair behaves         | [VOLUNTEER-INSTRUCTIONS] |
+| Our city                      | [VOLUNTEER-API]          |
+| Proposals to test with        | [VOLUNTEER-TEST]         |
+| Wishes for the look           | [VOLUNTEER-DESIGN]       |
 
 ---
 
-## Part 0 — Show the goal (3 minutes)
+## 1. What we build
 
-DO: Open the finished Green Council page. Put one proposal, for example
-"Ban cars from the city centre on weekends". Let it run.
+Today we learned five things: instructions, knowledge, tools, connections, and agents that talk
+to each other. Now we put all five into one system. And we make it a bit silly, because silly is
+easier to remember.
 
-SAY: This is what we build now, together, from an empty folder. A council chamber. Every seat is
-an AI agent with one of your names. You give it a proposal for the city. Every delegate votes yes
-or no. The chair decides.
+We build a **Green Council**. A city council that decides about the environment. You type a
+proposal, for example "Ban cars from the city centre on weekends".
 
-SAY: Look at the panel on the right. It shows the four building blocks from today. The knowledge
-base: the rules of the council. A tool: live air quality from a public API. A2A: the chair asks
-every delegate. And the decision.
+Every seat in the council is an AI agent. And every agent has one of **your** names. So in ten
+minutes there will be an AI version of you that votes in public. No pressure.
 
-SAY: I will not write this code by hand. You give me the content, I give prompts to a coding
-agent, and it builds the system in my Azure project.
+The delegates vote yes or no. Then the chair decides. The chair is the only one who has read the
+rules, which makes it different from most meetings.
 
----
+*(Show the finished page for one minute, so everybody sees where we are going.)*
 
-## Part 1 — Collect the pieces from the room (8 minutes)
+Here is what the council needs. Remember this list, we tick it off one by one:
 
-SAY: Each of you owns one piece. Please write your answer in the chat.
-
-ASK (everyone): Your delegate needs a role and a character. Write one line like this:
-`Role: City engineer. Character: I only care whether it can be built and paid for.`
-You can be yourself, or the opposite of yourself.
-
-ASK ([VOLUNTEER-KNOWLEDGE]): You write the rules of our council. Give me three rules. For example:
-when is a proposal adopted, what happens when the vote is a tie, and when may the chair say no
-against the majority?
-
-ASK ([VOLUNTEER-INSTRUCTIONS]): You decide how the chair behaves. Strict? Friendly? Short answers?
-Give me one or two sentences.
-
-ASK ([VOLUNTEER-API]): Our council needs live data. Which city are we? The chair will look up the
-real air quality of that city, right now.
-
-ASK ([VOLUNTEER-TEST]): Give me three proposals to test with. One that should pass, one that should
-fail, and one where you are not sure.
-
-ASK ([VOLUNTEER-DESIGN]): Two wishes for the page. Colours, mood, what must be big.
-
-DO: Copy the chat answers into a text file so you can paste them into the prompts.
+1. A connection to Azure
+2. A folder where everything lives
+3. Delegates — **instructions**
+4. Rules — a **knowledge base**
+5. Live data — a **tool** that calls an API
+6. A chair who uses 4 and 5
+7. A way for the chair to ask the delegates — **A2A**
+8. A web page — **code**
 
 ---
 
-## Part 2 — The empty folder and the settings (3 minutes)
+## 2. Are we connected to Azure?
 
-DO: Create an empty folder and open a terminal in it.
+Before we build anything, let us check that my terminal knows who I am.
+
+**Run**
+
+```text
+az account show --query "{user:user.name, tenant:tenantId, subscription:name}" -o table
+```
+
+There I am. That is the account everything will run as. Remember this: we will not type a single
+password or key today. The coding agent works through this login. It can do what I am allowed to
+do, and nothing more. If it ever asks me for a password, we fire it.
+
+*(If the command says "Please run az login": run `az login`, pick the account, and run the check again.)*
+
+---
+
+## 3. The base folder
+
+Every project starts with an empty folder and a bit of hope.
+
+**Run**
 
 ```text
 mkdir council-live
 cd council-live
+code .
 ```
 
-DO: Create a file named `.env` with these two lines, with your own values.
+Now I start the coding agent in this folder. And the first thing I tell it is not "write code".
+The first thing is: here is what we are building, here is how the folder is organised, and here
+are the rules. It is like a new colleague on the first day. If you explain nothing, you get
+surprises.
+
+**Tell the coding agent**
+
+```text
+We are building a small project called "Green Council" live in front of a class, step by step.
+I will give you one small task at a time. After each task, stop and wait.
+
+WHAT IT IS
+A user types a proposal for a city. One AI agent per delegate votes YES or NO. A chair agent looks
+up live air quality through an API tool, reads the council rules from a knowledge base, asks every
+delegate over the A2A protocol, and decides. The agents live in my Microsoft Foundry project.
+A small Python server connects a web page to the chair.
+
+CREATE THIS STRUCTURE NOW (empty files are fine, I fill them with the class)
+  .env                   my settings: PROJECT_ENDPOINT, MODEL, CITY (one NAME=value per line)
+  .env.example           the same three names with placeholder values
+  .gitignore             must contain .env and state.json
+  README.md              five lines: what the project is and what each folder is for
+  agents/delegates.txt   one delegate per line:  Name | Role | Character
+  agents/chair.md        how the chair behaves (free text)
+  knowledge/charter.md   the rules of the council = our knowledge base
+  tools/                 OpenAPI definitions of API tools
+  scripts/               one small Python script per step
+  app/                   the web page and its server
+  state.json             ids that the scripts create (vector store, connections). Starts as {}.
+
+RULES FOR ALL LATER TASKS
+- I am signed in with "az login". Use DefaultAzureCredential (azure-identity). Never ask for keys
+  or passwords. Never print the values in .env.
+- Python 3.11. Standard library plus azure-identity, azure-ai-projects and openai. Read .env by
+  hand, do not add python-dotenv. Install a missing package with pip.
+- Every script prints one short "OK ..." line per thing it creates. On an error it prints the
+  HTTP status and the response body, and stops.
+- Token scopes: https://ai.azure.com/.default for my project endpoint,
+  https://management.azure.com/.default for management.azure.com.
+- Tell me each command before you run it. Ask before you delete anything.
+
+When the structure exists, show me the folder tree.
+```
+
+Look at the tree. Every folder has one job. `agents` is who they are. `knowledge` is what they
+know. `tools` is what they can do. `scripts` is how we build it. `app` is what people see.
+If you forget everything else from today, keep this picture.
+
+Now my settings. I open `.env` and put in three lines.
+
+**Paste into the file** `.env`
 
 ```text
 PROJECT_ENDPOINT=https://<your-resource>.services.ai.azure.com/api/projects/<your-project>
 MODEL=<your-model-deployment>
+CITY=<we fill this in soon>
 ```
 
-SAY: This is the only configuration. Two lines. The project endpoint says where my Foundry
-project is. The model says which model the agents use. There is no key and no password in it.
+This is all the configuration there is. The endpoint says where my Foundry project lives. The
+model says which model the agents use. No key. No password. And this file stays on my machine:
+look at `.gitignore`, it is listed there.
 
-DO: Show the login.
-
-```text
-az account show --query "{user:user.name, tenant:tenantId}" -o table
-```
-
-SAY: I am signed in with az login. The coding agent will work through this login. It can do what
-my account is allowed to do, and nothing more.
-
-DO: Start the coding agent in the `council-live` folder.
+✔ Connection. ✔ Folder. Six to go.
 
 ---
 
-## Part 3 — The build, prompt by prompt
+## 4. The delegates — your instructions
 
-### Prompt 1 — the project brief
+A council without delegates is called a room. So we need people. That is you.
 
-SAY: The first prompt does not build anything. It explains the project to the agent: what we
-build, how the folder is organised, and the rules. A good first prompt saves ten corrections later.
+**Ask the room**
 
-PROMPT:
+Everybody, please write one line in the chat, in this form:
 
 ```text
-You are helping me build a small project called "Green Council" live in front of a class.
-Read this brief, then wait for my next prompts. Do not build anything yet.
-
-WHAT WE BUILD
-A web page that shows a council chamber. A user types a proposal for a city. One AI agent per
-delegate votes YES or NO over the A2A protocol. A chair agent asks all delegates, looks up live
-air quality through an API tool, reads the council rules from a knowledge base, and decides.
-The agents live in my Microsoft Foundry project. A small Python server connects the page to them.
-
-THE FOLDER (everything goes in this folder, no sub-folders)
-  .env                 EXISTS. I created it. PROJECT_ENDPOINT and MODEL, one NAME=value per line.
-                       Read it, never print its values, never change it.
-  council.json         the city and the delegates (name, role, character)        - prompt 2
-  council-charter.md   the rules of the council = our knowledge base              - prompt 3
-  air-quality.json     OpenAPI definition of the live-data tool                   - prompt 4
-  setup_council.py     creates all agents and connections in Foundry              - prompt 5
-  server.py            the backend for the page                                   - prompt 6
-  index.html           the page                                                   - prompt 7
-
-RULES
-- I am signed in with "az login". Authenticate with DefaultAzureCredential (azure-identity).
-  Never ask for keys or passwords and never put secrets in a file.
-- Python 3.11. Use the standard library plus azure-identity, azure-ai-projects and openai.
-  Install a missing package with pip.
-- Read .env by hand: one NAME=value per line. Do not add python-dotenv.
-- Every script prints one short "OK ..." line per step. On an error it prints the HTTP status
-  and the response body and stops.
-- Ask before you delete anything. Tell me each command before you run it.
-
-FIRST TASK
-Run "az account show" and tell me which account and tenant I am signed in to. Then list the
-files in this folder and confirm that .env has both values (do not print them).
+YourName | your role in the council | how you think, in one sentence
 ```
 
-EXPECT: The agent names your account and says `.env` has both values.
+For example: `Mario | Business owner | I think about shops, jobs and costs, and I count twice.`
 
-SAY: Look, it checked who I am with az account show. No key was given.
+You can be yourself. You can be the opposite of yourself. You can be your boss. I will not ask.
 
-### Prompt 2 — the delegates (instructions)
+*(Give them one minute. Roles that work well: climate scientist, business owner, city engineer,
+finance delegate, citizens' voice, youth delegate, farmer, tourist.)*
 
-SAY: Now your delegates. These lines are their instructions. This is the first building block.
+**Paste into the file** `agents/delegates.txt` — one line per person, exactly as they wrote it.
 
-PROMPT (paste the chat lines of the participants where it says so):
+These lines are **instructions**. This morning we wrote instructions for one agent. Now each of
+you wrote them for your own.
+
+**Tell the coding agent**
 
 ```text
-Create council.json with this shape:
-{ "city": "<city>", "delegates": [ { "name": "...", "role": "...", "character": "..." } ] }
+Task: scripts/01_delegates.py. Create it and run it.
 
-The city is: <CITY FROM THE PARTICIPANT>
+Read agents/delegates.txt (Name | Role | Character per line, skip empty lines) and CITY from .env.
+For every delegate create a Microsoft Foundry prompt agent named "Delegate" + the name (letters
+and digits only, first letter upper case):
 
-The delegates, one per line (name: role and character):
-<PASTE THE PARTICIPANTS' LINES HERE>
+  POST {PROJECT_ENDPOINT}/agents/{agent_name}/versions?api-version=v1
+  Body: {"definition": {"kind": "prompt", "model": MODEL, "instructions": "..."}}
 
-Keep each person's own words for the character. Fix only spelling. Show me the file.
+Instructions for each one:
+  You are {name}, a delegate in the Green Council of {city}.
+  Your role: {role}. {character}
+  The chair sends you a proposal for the city. Judge it strictly from your role.
+  Take a clear side; do not sit on the fence. Answer in exactly this format:
+  VOTE: YES or NO
+  Then one or two short sentences with your reason, in your own voice.
+
+Then add a second script scripts/ask.py:
+  python scripts/ask.py <AgentName> "<question>"
+It calls the agent and prints item.type for every item in response.output, then the final text:
+  from azure.ai.projects import AIProjectClient
+  openai = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=DefaultAzureCredential()).get_openai_client()
+  response = openai.responses.create(input=question,
+      extra_body={"agent_reference": {"name": agent_name, "type": "agent_reference"}})
 ```
 
-EXPECT: `council.json` with one entry per person.
-
-### Prompt 3 — the knowledge base
-
-SAY: The second building block is knowledge. [VOLUNTEER-KNOWLEDGE] gave us the rules. They go
-into a document. Later the chair searches this document before every decision.
-
-PROMPT:
+**Test** — CITY is not set yet, so first ask [VOLUNTEER-API]: which city are we? Put it in `.env`,
+then run the script again if needed. Now let us talk to one delegate directly.
 
 ```text
-Create council-charter.md: the charter of our Green Council. It is the knowledge base the chair
-searches before every decision. Write it as short, numbered rules in plain English.
-
-These rules come from the class and must be in it, in their meaning:
-<PASTE THE THREE RULES HERE>
-
-Also include these fixed parts:
-- Every delegate votes YES or NO and gives a reason.
-- Clean air rule: the chair looks up the live European Air Quality Index (EAQI) of the city.
-  0 to 20 is good, 20 to 40 is fair, 40 to 60 is moderate, above 60 is poor. If the air is poor
-  and the proposal would reduce pollution, a tie counts as ADOPTED.
-- If a proposal is illegal or harmful, it is REJECTED without a vote.
-- The answer of the chair: first line "DECISION: ADOPTED or REJECTED", second line
-  "COUNT: x YES, y NO", third line "AIR: the EAQI number and one word", then two sentences that
-  explain the decision and name the delegates whose reasons mattered most.
-
-If two rules contradict each other, tell me instead of choosing silently. Show me the file.
+python scripts/ask.py Delegate<Name> "Proposal: every Monday is a day without meetings."
 ```
 
-EXPECT: `council-charter.md` with the class rules in it.
+There. That is [name]'s agent, and it has an opinion. [Name], is that what you would say?
 
-SAY: Notice the last line of the prompt. If two rules contradict each other, the agent must tell
-us. We do not want it to decide that alone.
+*(Open the Foundry portal → Agents. Show the new agents. Open one and show the instructions:
+their own words from the chat.)*
 
-### Prompt 4 — the tool (an API)
+They exist in my Azure project now. Real agents, with your names. If one of them says something
+embarrassing later, remember who wrote its instructions.
 
-SAY: The third building block is a tool. The chair needs live data that is in no document:
-the air quality right now. For that we describe a public API in an OpenAPI file.
+✔ Delegates.
 
-PROMPT:
+---
+
+## 5. The rules — our knowledge base
+
+Right now our delegates have opinions but the council has no rules. That is called social media.
+We need a charter.
+
+**Ask [VOLUNTEER-KNOWLEDGE]**
+
+You are our law maker. Please give me three rules in the chat:
+
+1. When is a proposal adopted?
+2. What happens when the vote is a tie?
+3. When may the chair say no, even against the majority?
+
+**Paste into the file** `knowledge/charter.md` — first their three rules, then this fixed part:
 
 ```text
-Create air-quality.json: an OpenAPI 3.0.1 definition named "AirQuality" for the free Open-Meteo
-air quality API. No authentication.
+## Clean air rule
+The chair looks up the live European Air Quality Index (EAQI) of our city before deciding.
+0 to 20 is good, 20 to 40 is fair, 40 to 60 is moderate, above 60 is poor.
+If the air is poor and the proposal would reduce pollution, a tie counts as ADOPTED.
 
+## How the chair answers
+First line:  DECISION: ADOPTED or REJECTED
+Second line: COUNT: x YES, y NO
+Third line:  AIR: the EAQI number and one word (good, fair, moderate or poor)
+Then two sentences: why, and which delegates' reasons mattered most.
+```
+
+This file is **knowledge**. Not instructions. Instructions say how to behave. Knowledge says what
+is true. The chair will search this document before every decision, the same way KodschulAssistant
+searched our PDF this morning.
+
+**Tell the coding agent**
+
+```text
+Task: scripts/02_knowledge.py. Create it and run it.
+
+Upload knowledge/charter.md into a new vector store so an agent can search it:
+  openai = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=DefaultAzureCredential()).get_openai_client()
+  store = openai.vector_stores.create(name="council-charter")
+  openai.vector_stores.files.upload_and_poll(vector_store_id=store.id, file=<the open file>)
+Save the id in state.json under "vector_store_id" (keep the other keys in state.json).
+```
+
+It says OK. We cannot see anything yet, because nobody is reading the charter. Patience. The
+chair comes in two steps.
+
+✔ Knowledge base.
+
+---
+
+## 6. Live data — a tool that calls an API
+
+Our council decides about the environment. So it should know one fact about the real world:
+how good is the air in our city, right now? That is in no document. For this we need a **tool**.
+
+[VOLUNTEER-API] chose our city. Let us see if the internet knows it.
+
+**Tell the coding agent**
+
+```text
+Task: tools/air-quality.json. Create it, then test the API.
+
+An OpenAPI 3.0.1 definition named "AirQuality" for the free Open-Meteo air quality API.
+No authentication.
 - Server: https://air-quality-api.open-meteo.com
 - One operation: GET /v1/air-quality, operationId getAirQuality
 - Query parameters, all required:
-    latitude  (number)  description: "Latitude of the city, for example 48.78 for Stuttgart."
-    longitude (number)  description: "Longitude of the city, for example 9.18 for Stuttgart."
-    current   (string)  description: "Always send exactly this text: european_aqi,pm2_5,pm10"
+    latitude  (number)  "Latitude of the city, for example 48.78 for Stuttgart."
+    longitude (number)  "Longitude of the city, for example 9.18 for Stuttgart."
+    current   (string)  "Always send exactly this text: european_aqi,pm2_5,pm10"
 - Response 200: an object "current" with time, european_aqi, pm2_5 and pm10.
 
-Then test the API itself with one request for the city in council.json and show me the numbers.
+Then call the API once yourself for the CITY in .env and tell me the air quality index and
+whether that is good, fair, moderate or poor.
 ```
 
-EXPECT: The file, and real numbers for your city.
+**Test** — the agent prints a real number.
 
-SAY: The agent called the API to check it. This number is the air quality in our city right now.
-The descriptions in this file are written for the agent. It reads them to know how to call the tool.
+That number is the air in our city at this minute. Not from the model's memory. From a sensor
+network, through an API.
 
-### Prompt 5 — the agents, the connections and A2A
+Look at the file. It does not contain the API. It **describes** the API: the address, the
+parameters, what comes back. The agent reads these descriptions to know how to call it. If you
+write a lazy description, you get a lazy tool.
 
-SAY: Now the big step. We create the agents in Foundry: one per delegate, and the chair. And we
-connect them over A2A. This is the part that took me hours the first time. Today it is one prompt,
-because the prompt contains what I learned.
+✔ Tool.
 
-PROMPT:
+---
+
+## 7. The chair
+
+Now the boss. The chair gets the knowledge base and the tool. Not the delegates yet. One thing at
+a time, so that when something breaks we know who to blame.
+
+**Ask [VOLUNTEER-INSTRUCTIONS]**
+
+How should our chair behave? Strict? Friendly? Dramatic? Give me one or two sentences.
+
+**Paste into the file** `agents/chair.md` — their sentences.
+
+**Tell the coding agent**
 
 ```text
-Create setup_council.py and run it. It reads .env and council.json and does four things in my
-Microsoft Foundry project. Use DefaultAzureCredential. Tokens: scope https://ai.azure.com/.default
-for the project endpoint, scope https://management.azure.com/.default for management.azure.com.
+Task: scripts/03_chair.py. Create it and run it.
 
-1. KNOWLEDGE. Upload council-charter.md into a vector store:
-     from azure.ai.projects import AIProjectClient
-     openai = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=credential).get_openai_client()
-     store = openai.vector_stores.create(name="council-charter")
-     openai.vector_stores.files.upload_and_poll(vector_store_id=store.id, file=<open file>)
+Create a Foundry prompt agent named "CouncilChair" (same POST call as the delegates) with two tools:
+  {"type": "file_search", "vector_store_ids": [<vector_store_id from state.json>]}
+  {"type": "openapi", "openapi": {"name": "AirQuality",
+     "description": "Live air quality (European Air Quality Index) for a city.",
+     "spec": <the content of tools/air-quality.json>, "auth": {"type": "anonymous"}}}
 
-2. DELEGATES. For every delegate create a prompt agent named "Delegate" + the name (letters and
-   digits only, first letter upper case):
-     POST {PROJECT_ENDPOINT}/agents/{agent}/versions?api-version=v1
-     {"definition": {"kind": "prompt", "model": MODEL, "instructions": "..."}}
-   Instructions:
-     You are {name}, a delegate in the Green Council of {city}.
-     Your role: {role}. {character}
-     The chair sends you a proposal for the city. Judge it strictly from your role.
-     Take a clear side; do not sit on the fence. Answer in exactly this format:
-     VOTE: YES or NO
-     Then one or two short sentences with your reason, in your own voice.
+Instructions:
+  You are the chair of the Green Council of {CITY}.
+  {the content of agents/chair.md}
+  When you get a proposal:
+  1. Get the live air quality of {CITY} with the AirQuality tool.
+  2. Ask every delegate for a vote, if you have delegates to ask.
+  3. Look up the council charter in your knowledge file and decide by its rules.
+  4. Answer in exactly the format that the charter defines.
+```
 
-3. A2A. For every delegate agent:
-   a) enable incoming A2A:
-        PATCH {PROJECT_ENDPOINT}/agents/{agent}?api-version=v1
-        {"agent_card": {"description": "<name>, <role> in the Green Council. Votes yes or no on a proposal.",
-                        "version": "1.0",
-                        "skills": [{"id": "vote", "name": "Vote", "description": "Votes yes or no on a proposal."}]},
-         "agent_endpoint": {"protocol_configuration": {"responses": {}, "a2a": {}}}}
-   b) create a connection named "council-" + the name in lower case (letters and digits only):
-        PUT https://management.azure.com{PROJECT_RESOURCE_ID}/connections/{connection}?api-version=2025-04-01-preview
-        {"properties": {"authType": "UserEntraToken", "category": "RemoteA2A",
-                        "target": "{PROJECT_ENDPOINT}/agents/{agent}/endpoint/protocols/a2a",
-                        "audience": "https://ai.azure.com", "Credentials": {}, "metadata": {}}}
+**Test** — we ask the chair two things: one needs the tool, one needs the knowledge.
+
+```text
+python scripts/ask.py CouncilChair "How is the air in our city right now, and what does our charter say about a tie?"
+```
+
+Read the steps it printed. `openapi_call`: that is the tool. `file_search_call`: that is the
+knowledge base. And the answer has the real number and [VOLUNTEER-KNOWLEDGE]'s rule about ties.
+
+So now we have a chair that knows the rules and knows the air. But it sits alone in an empty
+room, talking to itself. We have all been in that meeting.
+
+✔ Chair.
+
+---
+
+## 8. A2A — the chair asks the delegates
+
+The delegates exist. The chair exists. They cannot talk to each other. For that we need three
+small things, and this is the part that cost me a whole night, so today you get it in one prompt.
+
+1. Each delegate publishes a little card that says "I exist, and here is what I do".
+2. A **connection** from the chair to each delegate.
+3. An **A2A tool** on the chair for each connection.
+
+**Tell the coding agent**
+
+```text
+Task: scripts/04_connect.py. Create it and run it.
+
+For every delegate agent from agents/delegates.txt:
+
+a) Enable incoming A2A:
+   PATCH {PROJECT_ENDPOINT}/agents/{agent_name}?api-version=v1
+   {"agent_card": {"description": "<name>, <role> in the Green Council. Votes yes or no on a proposal.",
+                   "version": "1.0",
+                   "skills": [{"id": "vote", "name": "Vote", "description": "Votes yes or no on a proposal."}]},
+    "agent_endpoint": {"protocol_configuration": {"responses": {}, "a2a": {}}}}
+
+b) Create a project connection named "council-" + the name in lower case (letters and digits only):
+   PUT https://management.azure.com{PROJECT_RESOURCE_ID}/connections/{connection_name}?api-version=2025-04-01-preview
+   {"properties": {"authType": "UserEntraToken", "category": "RemoteA2A",
+                   "target": "{PROJECT_ENDPOINT}/agents/{agent_name}/endpoint/protocols/a2a",
+                   "audience": "https://ai.azure.com", "Credentials": {}, "metadata": {}}}
+
    Find PROJECT_RESOURCE_ID yourself: the account name is the first part of the host name of
    PROJECT_ENDPOINT, the project name is its last path segment. List my subscriptions
    (GET https://management.azure.com/subscriptions?api-version=2022-12-01) and in each one search
    GET {subscription id}/resources?$filter=resourceType eq 'Microsoft.CognitiveServices/accounts' and name eq '<account>'&api-version=2021-04-01
    The project resource ID is "<account resource id>/projects/<project name>".
 
-4. THE CHAIR. Create a prompt agent named "CouncilChair" (same POST as in 2) with these tools:
-     {"type": "file_search", "vector_store_ids": [store.id]}
-     {"type": "openapi", "openapi": {"name": "AirQuality",
-        "description": "Live air quality (European Air Quality Index) for a city.",
-        "spec": <content of air-quality.json>, "auth": {"type": "anonymous"}}}
-     one per delegate: {"type": "a2a", "a2a_version": "1.0", "project_connection_id": <connection resource id>}
-   Instructions of the chair:
-     You are the chair of the Green Council of {city}. A user sends a proposal for the city.
-     <THE CHAIR'S STYLE FROM THE PARTICIPANT>
-     1. Get the live air quality of {city} with the AirQuality tool.
-     2. Ask EVERY delegate for a vote: {the delegate names}. Send each of them the full proposal.
-        Never skip a delegate and never vote for a delegate yourself.
-     3. Look up the council charter in your knowledge file and decide by its rules.
-     4. Answer in exactly the format that the charter defines.
+Save the connection resource ids in state.json under "connections".
 
-Then test once and print every step:
-  response = openai.responses.create(input="<FIRST TEST PROPOSAL>",
-      extra_body={"agent_reference": {"name": "CouncilChair", "type": "agent_reference"}})
-  Print item.type for each item in response.output, then response.output_text.
+Then change scripts/03_chair.py so the chair also gets one tool per connection:
+  {"type": "a2a", "a2a_version": "1.0", "project_connection_id": <connection resource id>}
+and so that step 2 of its instructions becomes:
+  2. Ask EVERY delegate for a vote: {the delegate names}. Send each of them the full proposal.
+     Never skip a delegate and never vote for a delegate yourself.
+Run 03_chair.py again.
 ```
 
-EXPECT: One `OK` line per agent and connection. Then the test: a list of steps with
-`file_search_call`, `openapi_call`, several `a2a` steps, and a text that starts with `DECISION:`.
+**Ask [VOLUNTEER-TEST]** — give us three proposals: one that should pass, one that should fail,
+and one where you honestly do not know.
 
-DO: Open the Foundry portal → Agents. Show the new agents. Open one delegate and show its
-instructions: the participant's own words.
-
-SAY: Here they are in my project. This is [a participant]'s delegate, and these are the words
-they wrote in the chat. And look at the test output. First the knowledge search. Then the API
-call. Then one A2A call per delegate. That is the whole day in one answer.
-
-### Prompt 6 — the backend
-
-SAY: The agents work. Now we need code between a web page and the chair. The page cannot talk to
-Foundry directly, because the login is on my machine, not in the browser.
-
-PROMPT:
+**Test** — the first real session of our council.
 
 ```text
-Create server.py with the Python standard library (http.server) plus azure-ai-projects and
-azure-identity. It listens on http://127.0.0.1:8000 only.
+python scripts/ask.py CouncilChair "<the first proposal>"
+```
 
-- GET /             -> serve index.html from this folder
-- GET /api/council  -> the content of council.json
+Count the steps. One `file_search_call`. One `openapi_call`. And one `a2a` step for each of you.
+The chair asked every delegate, each delegate answered in character, and the chair decided by
+the charter.
+
+That is five different ideas from today in one answer. And nobody wrote a line of code by hand.
+
+*(If a delegate is missing in the steps, send the proposal again. The chair sometimes forgets
+someone, like every chair.)*
+
+✔ A2A. The council works. It is just not pretty yet.
+
+---
+
+## 9. The backend
+
+A terminal is fine for us. But a mayor will not open a terminal. We need a web page, and between
+the page and the chair we need a small server. Why not call Foundry directly from the browser?
+Because the login is on my machine, not in your browser. The server is the doorman.
+
+**Tell the coding agent**
+
+```text
+Task: app/server.py. Create it, start it, and test it.
+
+Python standard library (http.server) plus azure-ai-projects and azure-identity.
+Listen on http://127.0.0.1:8000 only. Read .env from the project root.
+
+- GET /             -> serve app/index.html (answer 404 with a short text while it does not exist)
+- GET /api/council  -> {"city": CITY, "delegates": [{"name": ..., "role": ..., "character": ...}]}
+                       from agents/delegates.txt
 - POST /api/propose <- {"proposal": "..."}
                     -> {"votes": [{"name": "...", "vote": "YES" or "NO" or null, "reason": "..."}],
                         "air": {"eaqi": 23, "pm2_5": 5.5, "pm10": 7.5} or null,
                         "used_knowledge": true or false,
                         "decision": "ADOPTED" or "REJECTED" or null,
                         "explanation": "..."}
-  Call the agent "CouncilChair" as in the test of setup_council.py and read response.output:
-  - item.type == "file_search_call"   -> used_knowledge is true
-  - item.type == "openapi_call_output" -> air: find the numbers european_aqi, pm2_5 and pm10 in
-    the text of item.output (skip the units block, take the numeric values)
+  Call the agent "CouncilChair" like scripts/ask.py does, and read response.output:
+  - item.type == "file_search_call"    -> used_knowledge is true
+  - item.type == "openapi_call_output" -> air: find the numeric values of european_aqi, pm2_5 and
+    pm10 in the text of item.output (ignore the units block where the values are words)
   - type contains "a2a" and ends with "call_output" -> one vote. item.name is the connection name
-    "council-<name>": map it back to the delegate's name from council.json. item.output is the
-    delegate's text: vote is YES or NO from the line "VOTE: ...", reason is the rest.
+    "council-<name>": map it back to the delegate's real name. item.output is the delegate's text:
+    vote is YES or NO from the line "VOTE: ...", reason is the rest.
   - decision: ADOPTED or REJECTED from the line "DECISION: ..." in response.output_text
   - explanation: response.output_text without the lines that start with DECISION, COUNT or AIR
-- Reject a missing, empty or longer than 500 characters proposal with status 400 and {"error": "..."}.
-- If the agent call fails, answer with status 502 and {"error": "<short reason>"}. Never crash.
+- A missing, empty or longer than 500 characters proposal: status 400 and {"error": "..."}.
+- If the agent call fails: status 502 and {"error": "<short reason>"}. Never crash.
 
-Start it and test POST /api/propose with one proposal. Show me the JSON. Leave the server running.
+Test POST /api/propose with one proposal and show me the JSON. Leave the server running.
 ```
 
-EXPECT: JSON with one vote per delegate, the air numbers, and a decision.
+**Test** — the agent shows JSON with a vote for each of you, the air numbers, and a decision.
 
-### Prompt 7 — the page
+Not beautiful. But this JSON is everything a page needs. The hard part is done.
 
-SAY: Last piece: the page. [VOLUNTEER-DESIGN] gave us two wishes for the design.
+✔ Backend.
 
-PROMPT:
+---
+
+## 10. The page
+
+Now we make it look like something you would show your boss.
+
+**Ask [VOLUNTEER-DESIGN]** — two wishes. Colours? Mood? What must be big?
+
+**Tell the coding agent**
 
 ```text
-Create index.html: one file, no libraries, no external fonts or images. It is the page for the
-Green Council and talks only to GET /api/council and POST /api/propose on the same server.
+Task: app/index.html. One file, no libraries, no external fonts or images.
+It talks only to GET /api/council and POST /api/propose on the same server.
 
 Layout
-- A header with the title "Green Council of <city>".
+- Header: "Green Council of <city>".
 - A box to type a proposal, a button "Open the vote", and five example proposals as chips.
-- The chamber: the delegates sit on a half circle, each as a coloured round avatar with the
-  first letter of the name, the name and the role under it, and a small vote badge. The chair sits
-  in the middle at the bottom. The decision appears large in the centre.
-- A panel "Under the hood" with four steps that light up one after the other: KB (knowledge base:
-  the charter was searched), API (the live air quality, with the number and a small scale from
-  good to poor), A2A (how many delegates answered), and the decision.
-- "The debate": one card per delegate with the name, role, vote and reason.
+- The chamber: the delegates sit on a half circle, each as a coloured round avatar with the first
+  letter of the name, the name and the role under it, and a small vote badge. The chair sits in
+  the middle at the bottom. The decision appears large in the centre.
+- A panel "Under the hood" with four steps that light up one after the other: KB (the charter was
+  searched), API (the live air quality with the number and a small scale from good to poor),
+  A2A (how many delegates answered), and the decision.
+- "The debate": one card per delegate with name, role, vote and reason.
 
 Behaviour
-- While waiting: every avatar shows a spinning ring and the four steps blink.
-- When the answer arrives, reveal it as a show: knowledge step, then the air quality, then the
-  delegates one by one (about 0.7 seconds apart: the avatar glows green for YES or red for NO and
-  the speech card appears), then the decision pops in with the count "x YES · y NO" and the
-  explanation.
+- While waiting, every avatar shows a spinning ring and the four steps blink.
+- When the answer arrives, reveal it like a show: the knowledge step, then the air quality, then
+  the delegates one by one (about 0.7 seconds apart: the avatar glows green for YES or red for NO
+  and the speech card appears), then the decision pops in with "x YES · y NO" and the explanation.
 - A delegate that is missing in the answer shows "not asked".
-- Errors from the backend are shown as a red line under the form.
+- Backend errors appear as a red line under the form.
 
-Design wishes from the class: <PASTE THE TWO WISHES HERE>
+Design wishes from the class: <PASTE THE WISHES HERE>
 Make it look like a real product: dark background, soft glow, generous spacing.
 
 Rules: put agent text on the page with textContent, never innerHTML. Respect
@@ -389,51 +512,58 @@ prefers-reduced-motion. It must also work on a narrow screen.
 When done, tell me to reload http://127.0.0.1:8000.
 ```
 
-EXPECT: The chamber in the browser with your names.
+**Test** — open http://127.0.0.1:8000 and put the second proposal.
 
-IF NEEDED: If the generated page is broken, copy the finished `index.html` from this repo folder
-into `council-live` and reload.
+*(While it thinks, about half a minute:)* The chair is asking each of you right now. Watch the
+panel on the right. Knowledge. Tool. A2A. Those are our three building blocks, live.
 
----
+There it is. [Name] voted no. [Name], would you have voted no?
 
-## Part 4 — Play (10 minutes)
+*(If the generated page is broken, copy the finished `index.html` from this repo folder into
+`app/` and reload. Nobody will know.)*
 
-DO: Open http://127.0.0.1:8000. Put the first test proposal.
-
-SAY: The chair is now asking every delegate. That takes about half a minute. Watch the panel on
-the right.
-
-SAY: [name], your delegate voted no. Would you have voted no?
-
-ASK (everyone): Does your delegate think like you? If not, give me a better sentence.
-
-PROMPT (change one delegate):
-
-```text
-In council.json change the character of "<name>" to: "<their new sentence>".
-Run setup_council.py again, then send the same proposal to /api/propose and tell me how
-<name> voted before and now.
-```
-
-PROMPT (change the knowledge base):
-
-```text
-Add this rule to council-charter.md: "<a new rule from the class>".
-Run setup_council.py again so the chair gets the new knowledge, send the same proposal again,
-and tell me whether the decision changed and why.
-```
-
-SAY: We changed one sentence in a document, and the decision changed. No code was touched.
-That is what a knowledge base is for.
+✔ Page. All eight. The council is open.
 
 ---
 
-## Part 5 — Share it with the room (optional, 5 minutes)
+## 11. Now break it — on purpose
 
-SAY: Right now the page only runs on my machine. Let us give it a public address so you can use
-it from your own browser.
+A system you cannot change is a museum. Let us change three things and watch what happens.
 
-DO: Install the tunnel tool once, then start it in a second terminal.
+**Change a person.** Does your delegate think like you? If not, give me a better sentence.
+
+*(Edit their line in `agents/delegates.txt`, then:)*
+
+```text
+python scripts/01_delegates.py
+```
+
+Same proposal again. Look: one sentence of instructions changed, and the vote changed.
+
+**Change the law.** [VOLUNTEER-KNOWLEDGE], you are in power. Add a rule. Any rule.
+"A tie always counts as adopted." "Proposals with the word free are always rejected."
+
+*(Edit `knowledge/charter.md`, then:)*
+
+```text
+python scripts/02_knowledge.py
+python scripts/03_chair.py
+```
+
+Same proposal again. We changed one line in a document. No code. And the decision is different.
+That is what a knowledge base is for. And that is also why you should be careful who is allowed
+to edit it.
+
+**Change the world.** Put a city with worse air into `.env`, run `03_chair.py` again, and send
+the third proposal: the one nobody was sure about.
+
+---
+
+## 12. Give everyone the link (optional)
+
+Right now the council only runs on my machine. Let us open the doors.
+
+**Run** (the first line only once)
 
 ```text
 winget install Cloudflare.cloudflared
@@ -443,25 +573,48 @@ winget install Cloudflare.cloudflared
 cloudflared tunnel --url http://127.0.0.1:8000
 ```
 
-DO: Copy the `https://....trycloudflare.com` address from the output into the meeting chat.
+It prints an address that ends in `trycloudflare.com`. I put it in the chat. Open it, and put
+your own proposal. Be nice. It is your own name voting.
 
-SAY: Open this link and put your own proposal. Your request goes to my machine, my server calls
-my agents with my login, and the answer comes back to you.
+What happens now: your browser talks to my machine, my server calls my agents with my login, and
+the answer travels back to you.
 
-SAY: This is a quick way to share a demo. It is not a production deployment. While the tunnel
-runs, anyone with the link uses my agents and my Azure budget. So I stop it when we are done.
+One honest word. This is a quick way to share a demo. It is not a real deployment. While this
+runs, everybody with the link spends my Azure budget. So when we are done, I press Ctrl+C, and
+the council goes home.
 
-DO: Stop the tunnel with Ctrl+C at the end.
-
-SAY: For a real deployment you would put server.py in a container on Azure, for example Azure
-Container Apps, give that app its own managed identity, and give that identity permission to call
-the chair agent. The code stays the same, because DefaultAzureCredential then uses the app's
-identity instead of my login.
+A real deployment would put `app/server.py` in a container on Azure, for example Azure Container
+Apps, with its own identity instead of my login, and that identity would get permission to call
+the chair. The code stays the same. Only the identity changes.
 
 ---
 
-## Closing words
+## 13. What you just built
 
-SAY: Look at what each of you built. Your delegate is your instructions. The charter is the
-knowledge base. The air quality is a tool. The votes travel over A2A. The page is code. Nothing
-here is new: it is everything from today, put together in one system.
+Look at the folder one more time.
+
+- `agents/` — your words. **Instructions.**
+- `knowledge/` — the charter. **Knowledge.**
+- `tools/` — the air quality. **A tool that calls an API.**
+- `scripts/` — connections and **A2A**.
+- `app/` — the page. **Code.**
+
+That is the whole day in five folders. And the real lesson is not the council. The lesson is
+that you can build a system like this in an hour, if you know these five pieces and you can
+explain clearly what you want.
+
+The council thanks you for your service. Session closed.
+
+---
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| "Please run az login" | Run `az login`, then repeat the step. |
+| A script prints HTTP 403 | The login has no permission on the project. Check the role "Foundry User" in the Azure Portal. |
+| A script prints HTTP 404 | Check `PROJECT_ENDPOINT` in `.env`. |
+| The chair answers without asking anyone | Run `scripts/03_chair.py` again, then send the proposal again. |
+| One delegate is missing | Send the proposal again. |
+| It takes longer than a minute | Normal with many delegates. Each one is a separate call. |
+| The coding agent goes in circles | Stop it. Use the finished `setup_council.py`, `server.py` and `index.html` from this folder. |
