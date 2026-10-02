@@ -22,6 +22,45 @@ Who gives what (fill in the names before you start):
 | Proposals to test with        | [VOLUNTEER-TEST]         |
 | Wishes for the look           | [VOLUNTEER-DESIGN]       |
 
+### Post this in the meeting chat at the very start
+
+So everybody knows their job, and the people with the bigger tasks can start writing while we set
+up the folder.
+
+```text
+GREEN COUNCIL — your jobs
+
+EVERYONE: one line for your delegate:
+  YourName | your role in the council | how you think, in one sentence
+
+[VOLUNTEER-KNOWLEDGE] — you write the KNOWLEDGE BASE (the rules of the council), as a small text
+with four headings: when a proposal is adopted / what happens on a tie / when the chair may say
+no against the majority / one more rule you want.
+
+[VOLUNTEER-INSTRUCTIONS] — you write the INSTRUCTIONS of the chair: its tone, what it always
+does, what it never does. Two to four sentences.
+
+[VOLUNTEER-API] — you choose our CITY. The chair will look up its real air quality.
+
+[VOLUNTEER-TEST] — you give three PROPOSALS to test: one that should pass, one that should fail,
+one where you are not sure.
+
+[VOLUNTEER-DESIGN] — you give two WISHES for the look of the page.
+
+Send everything in this chat. I paste it into the project, live.
+```
+
+In the script below, every place where you ask the team is marked with 🙋.
+
+| 🙋 Where | What you ask for | Goes into the file |
+| --- | --- | --- |
+| Step 4 | everyone: their delegate | `agents/delegates.txt` |
+| Step 4 | [VOLUNTEER-API]: the city | `.env` |
+| Step 5 | [VOLUNTEER-KNOWLEDGE]: the knowledge base | `knowledge/charter.md` |
+| Step 7 | [VOLUNTEER-INSTRUCTIONS]: the chair's instructions | `agents/chair.md` |
+| Step 8 | [VOLUNTEER-TEST]: test proposals | typed into the test |
+| Step 10 | [VOLUNTEER-DESIGN]: design wishes | pasted into the prompt |
+
 ---
 
 ## 1. What we build
@@ -162,7 +201,7 @@ look at `.gitignore`, it is listed there.
 
 A council without delegates is called a room. So we need people. That is you.
 
-**Ask the room**
+> ### 🙋 ASK THE TEAM — everyone writes the instructions of their own delegate
 
 Everybody, please write one line in the chat, in this form:
 
@@ -235,15 +274,35 @@ embarrassing later, remember who wrote its instructions.
 Right now our delegates have opinions but the council has no rules. That is called social media.
 We need a charter.
 
-**Ask [VOLUNTEER-KNOWLEDGE]**
+> ### 🙋 ASK THE TEAM — [VOLUNTEER-KNOWLEDGE] writes the knowledge base
+>
+> [VOLUNTEER-KNOWLEDGE], you are our law maker. You write the knowledge base of this system.
+> It is a small Markdown file. Please fill in this template and send it to me in the chat:
+>
+> ```text
+> # Charter of the Green Council
+>
+> ## When a proposal is adopted
+> (your rule, for example: the side with more votes wins)
+>
+> ## When the vote is a tie
+> (your rule: who decides, and how?)
+>
+> ## When the chair may say no against the majority
+> (your rule: in which case, and what must the chair explain?)
+>
+> ## One more rule you want
+> (anything: be serious or be creative)
+> ```
+>
+> You have three minutes. The rest of us wait in suspense.
 
-You are our law maker. Please give me three rules in the chat:
+*(While [VOLUNTEER-KNOWLEDGE] writes, tell the others: this is exactly what happens in a real
+project. Somebody in the business writes the rules. Not the developer. The developer only makes
+sure the agent can read them.)*
 
-1. When is a proposal adopted?
-2. What happens when the vote is a tie?
-3. When may the chair say no, even against the majority?
-
-**Paste into the file** `knowledge/charter.md` — first their three rules, then this fixed part:
+**Paste into the file** `knowledge/charter.md` — first exactly what [VOLUNTEER-KNOWLEDGE] sent,
+then this fixed part under it:
 
 ```text
 ## Clean air rule
@@ -325,11 +384,22 @@ write a lazy description, you get a lazy tool.
 Now the boss. The chair gets the knowledge base and the tool. Not the delegates yet. One thing at
 a time, so that when something breaks we know who to blame.
 
-**Ask [VOLUNTEER-INSTRUCTIONS]**
+> ### 🙋 ASK THE TEAM — [VOLUNTEER-INSTRUCTIONS] writes the instructions of the chair
+>
+> [VOLUNTEER-INSTRUCTIONS], you decide how our chair behaves. These are its instructions.
+> Please send me two to four sentences in the chat. This template helps:
+>
+> ```text
+> Tone: (strict / friendly / dramatic / very short ...)
+> The chair always: (for example: thanks every delegate by name)
+> The chair never: (for example: takes a side before the vote)
+> ```
 
-How should our chair behave? Strict? Friendly? Dramatic? Give me one or two sentences.
+**Paste into the file** `agents/chair.md` — exactly what [VOLUNTEER-INSTRUCTIONS] sent.
 
-**Paste into the file** `agents/chair.md` — their sentences.
+Compare this file with the charter. The charter says **what the rules are**: that is knowledge.
+This file says **how the chair behaves**: that is instructions. Two files, two jobs, written by
+two different people.
 
 **Tell the coding agent**
 
@@ -467,7 +537,9 @@ and so that step 2 of its instructions becomes:
 Run 03_chair.py again.
 ```
 
-**Ask [VOLUNTEER-TEST]** — give us three proposals: one that should pass, one that should fail,
+> ### 🙋 ASK THE TEAM — [VOLUNTEER-TEST] gives the test cases
+
+[VOLUNTEER-TEST], give us three proposals: one that should pass, one that should fail,
 and one where you honestly do not know.
 
 **Test** — the first real session of our council.
@@ -543,7 +615,9 @@ Not beautiful. But this JSON is everything a page needs. The hard part is done.
 
 Now we make it look like something you would show your boss.
 
-**Ask [VOLUNTEER-DESIGN]** — two wishes. Colours? Mood? What must be big?
+> ### 🙋 ASK THE TEAM — [VOLUNTEER-DESIGN] gives the design wishes
+
+[VOLUNTEER-DESIGN], two wishes for the page. Colours? Mood? What must be big?
 
 **Tell the coding agent**
 
