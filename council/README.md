@@ -34,8 +34,8 @@ Run `setup_council.py` again after every change to `council.json` or `council-ch
 
 ## Build it yourself, step by step
 
-[PROMPTS.md](PROMPTS.md) has one prompt per step for a coding agent. It builds the same project
-from an empty folder.
+[WORKSHOP.md](WORKSHOP.md) is the script for building it live with a class: what to say, what each
+participant gives, and every prompt for the coding agent, from an empty folder to a shared link.
 
 ## Notes
 
