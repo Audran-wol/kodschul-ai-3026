@@ -9,7 +9,9 @@ The files used in the live demos and labs of the seminar. The example company is
 | `agent/`     | `kodschul-assistant.md`               | Instructions and test questions for `KodschulAssistant`        | 01 Agent           |
 | `knowledge/` | `kodschul_agent_knowledge_source.pdf` | Knowledge file: facts the agent searches (upload to Foundry IQ) | 02 Knowledge       |
 | `skills/`    | `support-reply/SKILL.md`              | Skill file: steps for one task (attach to a toolbox, preview)  | Knowledge vs skill |
-| `openapi/`   | `todo-lookup.json`                    | OpenAPI definition of the demo tool `TodoLookup`               | 03 Tools, 04 MCP   |
+| `openapi/`   | `course-availability.json`            | OpenAPI definition of the tool `CourseAvailability` for KodschulAssistant | 03 Tools |
+| `openapi/`   | `todo-lookup.json`                    | OpenAPI definition of a second demo tool, `TodoLookup`         | 04 MCP             |
+| `api/`       | `courses/<code>/availability.json`    | Sample data served as a small demo API                         | 03 Tools           |
 | `code/`      | `run_agent.py`                        | Call an existing agent from Python and print every step        | 05 Code            |
 | `code/`      | `approval_demo.py`                    | Human approval of an MCP tool call in your own code            | 05 Code            |
 | `code/`      | `a2a_lab.py`                          | Build two agents that talk over A2A, then test them            | 06 Multi-Agent     |
@@ -59,6 +61,22 @@ Why this is better than giving the agent a key:
 - `az logout` ends its access
 
 The agent changes real resources. Read each command before you approve it.
+
+## Give KodschulAssistant a tool
+
+The tool `CourseAvailability` tells the agent how many seats are left in a course.
+
+1. Foundry → Build → Agents → `KodschulAssistant`
+2. Tools → Add → Custom → OpenAPI
+3. Name: `CourseAvailability`
+4. Authentication: Anonymous (a public demo API)
+5. Paste the content of `openapi/course-availability.json`
+6. Save and ask: `How many seats are left for AI-3026?`
+
+Expected answer: there are 4 seats left for AI-3026 on 10 October.
+
+The demo API has three courses: `AI-3026` (4 seats), `AI-900` (fully booked) and `AZ-104` (9 seats).
+An unknown course code returns 404.
 
 ## Knowledge file or skill?
 
