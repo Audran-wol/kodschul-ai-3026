@@ -18,6 +18,7 @@ New here? Start with the short command guide: [OVERVIEW.md](OVERVIEW.md)
 | `code/`      | `run_agent.py`                        | Call an existing agent from Python and print every step        | 05 Code            |
 | `code/`      | `approval_demo.py`                    | Human approval of an MCP tool call in your own code            | 05 Code            |
 | `code/`      | `a2a_lab.py`                          | Build two agents that talk over A2A, then test them            | 06 Multi-Agent     |
+| `council/`   | Green Council                         | Final project: AI delegates vote on a proposal for the city   | 07 Project         |
 | `project/`   | Pitch Jury                            | Final project: three AI jurors judge your idea in the browser  | 07 Project         |
 
 ## Setup (once per machine)

@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Green Council</title>
+<style>
+  :root {
+    --bg0: #07110f; --bg1: #0c1b22; --panel: rgba(255,255,255,.045); --panel-2: rgba(255,255,255,.07);
+    --line: rgba(255,255,255,.10); --text: #eef6f2; --muted: #9db3ac; --dim: #6f857f;
+    --green: #34d399; --green-deep: #059669; --red: #fb7185; --red-deep: #e11d48;
+    --amber: #fbbf24; --violet: #a78bfa; --sky: #38bdf8;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh; color: var(--text);
+    font: 16px/1.5 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(52,211,153,.16), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(56,189,248,.10), transparent 60%),
+      linear-gradient(160deg, var(--bg0), var(--bg1));
+    background-attachment: fixed;
+  }
+  main { max-width: 1240px; margin: 0 auto; padding: 26px 20px 48px; }
+
+  /* header */
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .mark { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; flex: none;
+    background: linear-gradient(135deg, var(--green), #0ea5e9); color: #04130e; font-weight: 800; font-size: 20px;
+    box-shadow: 0 8px 24px rgba(52,211,153,.35); }
+  h1 { margin: 0; font-size: 26px; letter-spacing: .01em; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* proposal form */
+  .motion { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel);
+    backdrop-filter: blur(6px); }
+  .motion .eyebrow, .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green); }
+  form { display: flex; gap: 10px; margin-top: 8px; }
+  label.sr { position: absolute; left: -9999px; }
+  input {
+    flex: 1; min-width: 0; padding: 14px 16px; font: inherit; font-size: 17px; color: var(--text);
+    background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 12px;
+  }
+  input::placeholder { color: var(--dim); }
+  button.go {
+    padding: 14px 24px; font: inherit; font-weight: 700; color: #04130e; cursor: pointer;
+    background: linear-gradient(135deg, var(--green), #2dd4bf); border: 0; border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(52,211,153,.30);
+  }
+  button.go:disabled { opacity: .5; cursor: default; box-shadow: none; }
+  input:focus-visible, button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+  .ideas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .ideas button { padding: 6px 12px; font: inherit; font-size: 13px; color: var(--muted); cursor: pointer;
+    background: transparent; border: 1px solid var(--line); border-radius: 999px; }
+  .ideas button:hover { color: var(--text); border-color: var(--green); }
+  #status { min-height: 22px; margin: 12px 2px 0; font-size: 14px; color: var(--muted); }
+  #status.error { color: var(--red); }
+
+  /* layout */
+  .stage { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr); gap: 18px; margin-top: 18px; }
+  .card { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); padding: 18px; }
+
+  /* the chamber */
+  .chamber-wrap { position: relative; overflow: hidden; }
+  .chamber { position: relative; width: 100%; aspect-ratio: 2 / 1.12; min-height: 380px; }
+  .arc { position: absolute; left: 50%; top: 86%; border: 1px dashed rgba(255,255,255,.10); border-bottom: 0;
+    border-radius: 999px 999px 0 0; transform: translate(-50%, -100%); }
+  .arc.a1 { width: 90%; height: 82%; } .arc.a2 { width: 62%; height: 56%; }
+  .seat { position: absolute; width: 132px; text-align: center; transform: translate(-50%, -50%); }
+  .avatar { position: relative; width: 82px; height: 82px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
+    font-size: 30px; font-weight: 800; color: #06120f; background: var(--c);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 26px rgba(0,0,0,.45); transition: box-shadow .35s, transform .35s; }
+  .seat .name { margin-top: 8px; font-weight: 700; line-height: 1.15; }
+  .seat .role { font-size: 12px; color: var(--muted); line-height: 1.2; }
+  .seat .pill { display: inline-block; margin-top: 5px; padding: 1px 11px; border-radius: 999px; font-size: 11px; font-weight: 800;
+    letter-spacing: .1em; color: var(--dim); border: 1px solid var(--line); }
+  .seat.thinking .avatar::after { content: ""; position: absolute; inset: -8px; border-radius: 50%;
+    border: 3px solid transparent; border-top-color: var(--green); border-right-color: var(--green); animation: spin 1s linear infinite; }
+  .seat.yes .avatar { box-shadow: 0 0 0 5px var(--green), 0 0 34px rgba(52,211,153,.65); transform: translateY(-6px); }
+  .seat.no .avatar { box-shadow: 0 0 0 5px var(--red), 0 0 34px rgba(251,113,133,.6); transform: translateY(-6px); }
+  .seat.yes .pill { background: var(--green); color: #04130e; border-color: var(--green); }
+  .seat.no .pill { background: var(--red); color: #1a0509; border-color: var(--red); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .chair { position: absolute; left: 50%; top: 86%; transform: translate(-50%, -50%); text-align: center; width: 170px; }
+  .chair .avatar { width: 70px; height: 70px; font-size: 13px; letter-spacing: .1em; color: var(--text);
+    background: linear-gradient(135deg, #1f2937, #0f172a); border: 2px solid var(--amber); }
+  .chair.working .avatar { box-shadow: 0 0 0 4px rgba(251,191,36,.25), 0 0 30px rgba(251,191,36,.45); }
+  .chair .role { font-size: 12px; color: var(--muted); }
+
+  .verdict { position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%); text-align: center; width: 46%; }
+  .verdict .word { font-size: clamp(26px, 4.2vw, 50px); font-weight: 900; letter-spacing: .06em; line-height: 1; }
+  .verdict.adopted .word { color: var(--green); text-shadow: 0 0 34px rgba(52,211,153,.5); }
+  .verdict.rejected .word { color: var(--red); text-shadow: 0 0 34px rgba(251,113,133,.5); }
+  .verdict .count { margin-top: 8px; font-weight: 700; color: var(--muted); }
+  .verdict .idle { color: var(--dim); font-size: 15px; }
+  .verdict.pop .word { animation: pop .5s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .why { margin: 14px 4px 0; color: var(--text); font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+  /* under the hood */
+  .hood h2, .debate h2 { margin: 2px 0 12px; font-size: 16px; }
+  .step { display: grid; grid-template-columns: 46px 1fr; gap: 12px; padding: 12px; border-radius: 14px;
+    border: 1px solid var(--line); background: rgba(0,0,0,.18); margin-bottom: 10px; transition: border-color .3s, background .3s; }
+  .step .tag { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+    letter-spacing: .04em; color: var(--dim); border: 1px solid var(--line); }
+  .step b { display: block; font-size: 14px; }
+  .step span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+  .step .live { margin-top: 6px; font-size: 13px; color: var(--text); }
+  .step.running { border-color: rgba(251,191,36,.55); }
+  .step.running .tag { color: var(--amber); border-color: var(--amber); animation: blink 1s ease-in-out infinite; }
+  .step.done { border-color: rgba(52,211,153,.55); background: rgba(52,211,153,.07); }
+  .step.done .tag { color: #04130e; background: var(--green); border-color: var(--green); }
+  @keyframes blink { 50% { opacity: .4; } }
+  .gauge { position: relative; height: 8px; margin-top: 8px; border-radius: 999px;
+    background: linear-gradient(90deg, #34d399 0 20%, #a3e635 20% 40%, #fbbf24 40% 60%, #fb923c 60% 80%, #fb7185 80% 100%); }
+  .gauge i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: #fff; left: 0; transition: left .8s ease; }
+
+  /* the debate */
+  .debate { margin-top: 18px; }
+  .speeches { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .speech { padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(0,0,0,.18);
+    border-left: 4px solid var(--c); animation: rise .45s ease both; }
+  .speech .top { display: flex; align-items: center; gap: 8px; }
+  .speech .who { font-weight: 700; } .speech .role { font-size: 12px; color: var(--muted); }
+  .speech .v { margin-left: auto; padding: 1px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
+  .speech .v.yes { background: var(--green); color: #04130e; } .speech .v.no { background: var(--red); color: #1a0509; }
+  .speech p { margin: 8px 0 0; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .empty { color: var(--dim); font-size: 14px; }
+  @keyframes rise { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  @media (max-width: 900px) { .stage { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    form { flex-direction: column; }
+    .chamber { aspect-ratio: auto; min-height: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding-bottom: 8px; }
+    .arc { display: none; }
+    .seat, .chair, .verdict { position: static; transform: none; width: auto; }
+    .chair, .verdict { grid-column: 1 / -1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="mark" aria-hidden="true">GC</div>
+    <div>
+      <h1 id="title">Green Council</h1>
+      <p>Put a proposal to the council. Every delegate is an AI agent. They vote, and the chair decides.</p>
+    </div>
+  </header>
+
+  <section class="motion">
+    <div class="eyebrow">New proposal</div>
+    <form id="form">
+      <label class="sr" for="proposal">Your proposal for the city</label>
+      <input id="proposal" autocomplete="off" maxlength="500" required
+        placeholder="Ban cars from the city centre on weekends">
+      <button class="go" id="send">Open the vote</button>
+    </form>
+    <div class="ideas" id="ideas" aria-label="Example proposals"></div>
+    <p id="status" aria-live="polite"></p>
+  </section>
+
+  <div class="stage">
+    <section class="card chamber-wrap" aria-label="Council chamber">
+      <div class="eyebrow">The chamber</div>
+      <div class="chamber" id="chamber">
+        <div class="arc a1" aria-hidden="true"></div>
+        <div class="arc a2" aria-hidden="true"></div>
+        <div class="verdict" id="verdict" aria-live="polite">
+          <div class="idle" id="verdict-idle">The council is waiting for a proposal.</div>
+          <div class="word" id="verdict-word" hidden></div>
+          <div class="count" id="verdict-count" hidden></div>
+        </div>
+        <div class="chair" id="chair">
+          <div class="avatar">CHAIR</div>
+          <div class="name" style="margin-top:8px;font-weight:700">The chair</div>
+          <div class="role">asks every delegate, then decides</div>
+        </div>
+      </div>
+      <p class="why" id="why" hidden></p>
+    </section>
+
+    <aside class="card hood" aria-label="How it works">
+      <h2>Under the hood</h2>
+      <div class="step" id="step-kb">
+        <div class="tag">KB</div>
+        <div><b>Knowledge base</b><span>The chair searches the council charter: the rules for the decision.</span>
+          <div class="live" id="kb-live"></div></div>
+      </div>
+      <div class="step" id="step-api">
+        <div class="tag">API</div>
+        <div><b>Tool: live air quality</b><span>The chair calls a public API through an OpenAPI tool.</span>
+          <div class="live" id="api-live"></div>
+          <div class="gauge" id="gauge" hidden><i id="needle"></i></div></div>
+      </div>
+      <div class="step" id="step-a2a">
+        <div class="tag">A2A</div>
+        <div><b>Agent to agent</b><span>One connection per delegate. The chair sends each one the proposal.</span>
+          <div class="live" id="a2a-live"></div></div>
+      </div>
+      <div class="step" id="step-rule">
+        <div class="tag">§</div>
+        <div><b>Decision</b><span>The chair applies the charter to the votes and the air quality.</span>
+          <div class="live" id="rule-live"></div></div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="card debate" aria-label="The debate">
+    <h2>The debate</h2>
+    <div class="speeches" id="speeches"><p class="empty" id="no-speeches">The delegates' speeches appear here.</p></div>
+  </section>
+</main>
+
+<script>
+/*
+  This page needs a backend with two endpoints:
+
+    GET  /api/council  ->  { "city": "Stuttgart",
+                             "delegates": [ { "name": "Ada", "role": "Climate scientist", "character": "..." }, ... ] }
+    POST /api/propose  <-  { "proposal": "..." }
+                       ->  { "votes": [ { "name": "Ada", "vote": "YES" | "NO" | null, "reason": "..." }, ... ],
+                             "air": { "eaqi": 23, "pm2_5": 5.5, "pm10": 7.5 } | null,
+                             "used_knowledge": true | false,
+                             "decision": "ADOPTED" | "REJECTED" | null,
+                             "explanation": "..." }
+                       on error: any non-200 status with { "error": "..." }
+*/
+const EXAMPLES = [
+  "Ban cars from the city centre on weekends",
+  "Make public transport free for everyone",
+  "Plant 10,000 trees and remove 500 parking spaces",
+  "Build a new airport runway to bring more tourists",
+  "Require solar panels on every new roof",
+];
+const COLORS = ["#34d399", "#fbbf24", "#38bdf8", "#a78bfa", "#fb7185", "#2dd4bf", "#f472b6", "#a3e635"];
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise((done) => setTimeout(done, ms));
+const seats = new Map();     // delegate name -> { seat, delegate, color }
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;   // textContent only: agent answers are untrusted text
+  return node;
+}
+function setStatus(text, isError = false) { $("status").textContent = text; $("status").className = isError ? "error" : ""; }
+function setStep(id, state, live) { $(id).className = "step" + (state ? " " + state : ""); }
+function airWord(eaqi) { return eaqi <= 20 ? "good" : eaqi <= 40 ? "fair" : eaqi <= 60 ? "moderate" : "poor"; }
+
+// Draw one seat per delegate on a half circle.
+fetch("/api/council").then((r) => r.json()).then((council) => {
+  $("title").textContent = "Green Council of " + council.city;
+  const n = council.delegates.length;
+  council.delegates.forEach((delegate, i) => {
+    const angle = Math.PI + (i + 0.5) / n * Math.PI;
+    const seat = el("div", "seat");
+    seat.style.left = (50 + 43 * Math.cos(angle)) + "%";
+    seat.style.top = (86 + 76 * Math.sin(angle)) + "%";
+    const color = COLORS[i % COLORS.length];
+    const avatar = el("div", "avatar", delegate.name.slice(0, 1).toUpperCase());
+    avatar.style.setProperty("--c", color);
+    seat.append(avatar, el("div", "name", delegate.name), el("div", "role", delegate.role), el("span", "pill", "—"));
+    $("chamber").append(seat);
+    seats.set(delegate.name, { seat, delegate, color });
+  });
+  $("a2a-live").textContent = n + " delegates, " + n + " connections";
+}).catch(() => setStatus("No backend yet. Start server.py first.", true));
+
+for (const example of EXAMPLES) {
+  const chip = el("button", "", example);
+  chip.type = "button";
+  chip.addEventListener("click", () => { $("proposal").value = example; $("proposal").focus(); });
+  $("ideas").append(chip);
+}
+
+function resetAll() {
+  for (const { seat } of seats.values()) { seat.className = "seat thinking"; seat.querySelector(".pill").textContent = "…"; }
+  $("speeches").replaceChildren();
+  $("verdict").className = "verdict";
+  $("verdict-idle").hidden = false; $("verdict-idle").textContent = "The delegates are thinking…";
+  $("verdict-word").hidden = true; $("verdict-count").hidden = true; $("why").hidden = true;
+  $("chair").className = "chair working";
+  for (const id of ["step-kb", "step-api", "step-a2a", "step-rule"]) setStep(id, "running");
+  $("kb-live").textContent = ""; $("api-live").textContent = ""; $("rule-live").textContent = ""; $("gauge").hidden = true;
+}
+
+$("form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const proposal = $("proposal").value.trim();
+  if (!proposal) return;
+  $("send").disabled = true;
+  resetAll();
+  setStatus(`The chair is asking ${seats.size} delegates. This takes up to a minute.`);
+
+  try {
+    const response = await fetch("/api/propose", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proposal }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "The backend returned an error.");
+
+    // 1. knowledge base
+    setStep("step-kb", data.used_knowledge ? "done" : "");
+    $("kb-live").textContent = data.used_knowledge ? "council-charter.md was searched" : "not used this time";
+    await wait(600);
+
+    // 2. API tool
+    if (data.air && data.air.eaqi != null) {
+      setStep("step-api", "done");
+      $("api-live").textContent = `Air quality index ${data.air.eaqi} (${airWord(data.air.eaqi)}) · PM2.5 ${data.air.pm2_5} µg/m³`;
+      $("gauge").hidden = false;
+      requestAnimationFrame(() => { $("needle").style.left = Math.min(data.air.eaqi, 100) + "%"; });
+    } else {
+      setStep("step-api", "");
+      $("api-live").textContent = "not called this time";
+    }
+    await wait(700);
+
+    // 3. the votes, one by one
+    setStatus("The delegates are voting…");
+    $("verdict-idle").textContent = "Voting…";
+    let yes = 0, no = 0, heard = 0;
+    for (const [name, { seat, delegate, color }] of seats) {
+      await wait(750);
+      const vote = (data.votes || []).find((v) => v.name === name);
+      if (!vote) { seat.className = "seat"; seat.querySelector(".pill").textContent = "not asked"; continue; }
+      heard++;
+      const state = vote.vote === "YES" ? "yes" : vote.vote === "NO" ? "no" : "";
+      seat.className = "seat " + state;
+      seat.querySelector(".pill").textContent = vote.vote || "?";
+      if (state === "yes") yes++; else if (state === "no") no++;
+      const speech = el("article", "speech");
+      speech.style.setProperty("--c", color);
+      const top = el("div", "top");
+      const who = el("div");
+      who.append(el("div", "who", name), el("div", "role", delegate.role));
+      top.append(who, el("span", "v " + state, vote.vote || "?"));
+      speech.append(top, el("p", "", vote.reason));
+      $("speeches").append(speech);
+      $("a2a-live").textContent = `${heard} of ${seats.size} delegates answered`;
+    }
+    setStep("step-a2a", heard ? "done" : "");
+    await wait(900);
+
+    // 4. the decision
+    const adopted = data.decision === "ADOPTED";
+    $("verdict-idle").hidden = true;
+    $("verdict-word").textContent = data.decision || "NO DECISION";
+    $("verdict-word").hidden = false;
+    $("verdict-count").textContent = `${yes} YES · ${no} NO`;
+    $("verdict-count").hidden = false;
+    $("verdict").className = "verdict pop " + (data.decision ? (adopted ? "adopted" : "rejected") : "");
+    $("why").textContent = data.explanation;
+    $("why").hidden = false;
+    setStep("step-rule", data.decision ? "done" : "");
+    $("rule-live").textContent = data.decision ? "charter applied: " + data.decision.toLowerCase() : "";
+    $("chair").className = "chair";
+    setStatus("The council has decided. Put the next proposal.");
+  } catch (error) {
+    for (const { seat } of seats.values()) { seat.className = "seat"; seat.querySelector(".pill").textContent = "—"; }
+    for (const id of ["step-kb", "step-api", "step-a2a", "step-rule"]) setStep(id, "");
+    $("chair").className = "chair";
+    $("verdict-idle").textContent = "The council is waiting for a proposal.";
+    $("speeches").replaceChildren(el("p", "empty", "The delegates' speeches appear here."));
+    setStatus(error.message, true);
+  } finally {
+    $("send").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

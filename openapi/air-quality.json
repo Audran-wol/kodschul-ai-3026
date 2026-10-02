@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "AirQuality",
+    "description": "Live air quality for any place on earth (Open-Meteo). No key needed.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://air-quality-api.open-meteo.com" }
+  ],
+  "paths": {
+    "/v1/air-quality": {
+      "get": {
+        "operationId": "getAirQuality",
+        "summary": "Get the current European Air Quality Index (EAQI) and fine dust values for a location.",
+        "parameters": [
+          { "name": "latitude", "in": "query", "required": true,
+            "description": "Latitude of the city, for example 48.78 for Stuttgart.",
+            "schema": { "type": "number" } },
+          { "name": "longitude", "in": "query", "required": true,
+            "description": "Longitude of the city, for example 9.18 for Stuttgart.",
+            "schema": { "type": "number" } },
+          { "name": "current", "in": "query", "required": true,
+            "description": "Always send exactly this text: european_aqi,pm2_5,pm10",
+            "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current air quality values.",
+            "content": { "application/json": { "schema": { "type": "object", "properties": {
+              "current": { "type": "object", "properties": {
+                "time": { "type": "string" },
+                "european_aqi": { "type": "number" },
+                "pm2_5": { "type": "number" },
+                "pm10": { "type": "number" } } } } } } }
+          }
+        }
+      }
+    }
+  }
+}

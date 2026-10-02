@@ -1,0 +1,11 @@
+{
+  "city": "Stuttgart",
+  "delegates": [
+    { "name": "Ada",   "role": "Climate scientist", "character": "You trust data and think about the next thirty years." },
+    { "name": "Linus", "role": "Business owner",    "character": "You think about shops, jobs and costs for local companies." },
+    { "name": "Grace", "role": "City engineer",     "character": "You only care whether it can be built, paid for and maintained." },
+    { "name": "Alan",  "role": "Finance delegate",  "character": "You watch the city budget and ask who pays." },
+    { "name": "Marie", "role": "Citizens' voice",   "character": "You speak for the daily life of residents and for fairness." },
+    { "name": "Tim",   "role": "Youth delegate",    "character": "You are impatient and want bold action now." }
+  ]
+}
