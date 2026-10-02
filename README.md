@@ -13,6 +13,7 @@ The files used in the live demos and labs of the seminar. The example company is
 | `code/`      | `run_agent.py`                        | Call an existing agent from Python and print every step        | 05 Code            |
 | `code/`      | `approval_demo.py`                    | Human approval of an MCP tool call in your own code            | 05 Code            |
 | `code/`      | `a2a_lab.py`                          | Build two agents that talk over A2A, then test them            | 06 Multi-Agent     |
+| `project/`   | Pitch Jury                            | Final project: three AI jurors judge your idea in the browser  | 07 Project         |
 
 ## Setup (once per machine)
 
@@ -135,3 +136,43 @@ python approval_demo.py "your question" AgentName
 ```
 
 The script shows the tool and its arguments, asks `Approve? [y/n]`, and sends your decision back to the agent.
+
+## Final project: Pitch Jury
+
+You type an idea for a product. Three AI jurors judge it, and the jury lead gives a score out of 10.
+
+```text
+your idea (index.html)  →  backend (server.py)  →  JuryLead  →  A2A  →  JurorCustomer
+                                                    (rubric.md)        →  JurorEngineer
+                                                                       →  JurorInvestor
+```
+
+| File in `project/` | What it is                                                          |
+| ------------------ | ------------------------------------------------------------------- |
+| `index.html`       | The finished web page                                               |
+| `rubric.md`        | Knowledge file: the rules the jury lead uses to score               |
+| `setup_jury.py`    | Creates the four agents and connects them over A2A                  |
+| `PROMPT.md`        | The prompt for your coding agent: it writes the backend `server.py` |
+| `.env.example`     | Template for your settings                                          |
+
+Steps:
+
+1. Go to the `project/` folder.
+2. Create your settings file: `copy .env.example .env` (macOS: `cp .env.example .env`).
+   Open `.env` and set `PROJECT_ENDPOINT` and `MODEL`.
+3. Create the agents: `python setup_jury.py`
+4. Start your coding agent in this folder and give it the prompt from `PROMPT.md`.
+5. Run the backend: `python server.py`
+6. Open http://127.0.0.1:8000, type an idea and select **Ask the jury**. It takes about 30 seconds.
+
+What it uses from the seminar:
+
+| Topic        | Where                                                        |
+| ------------ | ------------------------------------------------------------ |
+| Instructions | Each juror has its own character                             |
+| Knowledge    | `rubric.md` is uploaded and searched by the jury lead        |
+| A2A          | The jury lead calls the three jurors                         |
+| Code         | The backend calls the jury lead and reads the A2A steps      |
+
+The `.env` file stays on your machine and is never committed (it is in `.gitignore`).
+There is no password in it: the scripts use your `az login`.

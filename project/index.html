@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pitch Jury</title>
+<style>
+  :root {
+    --bg: #f7f5fb; --panel: #ffffff; --text: #171629; --muted: #6b6680; --line: #e8e3f1;
+    --accent: #5b21e6; --customer: #0e7490; --engineer: #6d3af2; --investor: #b45309;
+    --good: #15803d; --mid: #b45309; --bad: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12101c; --panel: #1b1829; --text: #f1eefb; --muted: #a39db8; --line: #2e2a42;
+      --accent: #a78bfa; --customer: #22d3ee; --engineer: #a78bfa; --investor: #fbbf24;
+      --good: #4ade80; --mid: #fbbf24; --bad: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { margin: 0; font-size: 30px; }
+  .lead { margin: 4px 0 24px; color: var(--muted); }
+  form { display: flex; flex-direction: column; gap: 10px; }
+  label { font-weight: 600; }
+  textarea {
+    width: 100%; min-height: 96px; padding: 12px 14px; resize: vertical;
+    font: inherit; color: var(--text); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px;
+  }
+  textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button {
+    align-self: flex-start; padding: 11px 22px; font: inherit; font-weight: 600; color: #fff;
+    background: #5b21e6; border: 0; border-radius: 10px; cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  #status { min-height: 24px; margin: 18px 0 10px; color: var(--muted); }
+  #status.error { color: var(--bad); }
+  .jurors { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card { padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+  .card h2 { margin: 0 0 6px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  .card p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .customer h2 { color: var(--customer); }
+  .engineer h2 { color: var(--engineer); }
+  .investor h2 { color: var(--investor); }
+  .waiting p { color: var(--muted); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  @media (prefers-reduced-motion: reduce) { .waiting p { animation: none; } }
+  #verdict { display: none; gap: 20px; align-items: center; margin-top: 14px; }
+  #verdict.show { display: flex; }
+  #score { flex: none; min-width: 110px; text-align: center; font-size: 44px; font-weight: 700; line-height: 1; }
+  #score small { display: block; margin-top: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .good { color: var(--good); } .mid { color: var(--mid); } .bad { color: var(--bad); }
+  @media (max-width: 560px) { #verdict.show { flex-direction: column; align-items: flex-start; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pitch Jury</h1>
+  <p class="lead">Describe your idea. Three AI jurors judge it, and the jury lead gives the score.</p>
+
+  <form id="form">
+    <label for="idea">Your idea</label>
+    <textarea id="idea" maxlength="1000" required
+      placeholder="Example: an app that reminds people to water their plants, with a sensor in the pot. 5 euros per month."></textarea>
+    <button id="send">Ask the jury</button>
+  </form>
+
+  <p id="status" aria-live="polite"></p>
+
+  <section class="jurors" id="jurors" aria-label="Juror opinions" hidden>
+    <article class="card customer" id="customer"><h2>The customer</h2><p></p></article>
+    <article class="card engineer" id="engineer"><h2>The engineer</h2><p></p></article>
+    <article class="card investor" id="investor"><h2>The investor</h2><p></p></article>
+  </section>
+
+  <section class="card" id="verdict" aria-label="Verdict">
+    <div id="score"></div>
+    <p id="verdict-text"></p>
+  </section>
+</main>
+
+<script>
+/*
+  This page needs a backend with one endpoint:
+
+    POST /api/judge  <-  { "idea": "..." }
+                     ->  { "jurors": [ { "name": "Customer", "opinion": "..." },
+                                       { "name": "Engineer", "opinion": "..." },
+                                       { "name": "Investor", "opinion": "..." } ],
+                           "verdict": "...",
+                           "score": 7 }            (score may be null)
+                     on error: any non-200 status with { "error": "..." }
+*/
+const form = document.getElementById("form");
+const idea = document.getElementById("idea");
+const send = document.getElementById("send");
+const status = document.getElementById("status");
+const jurors = document.getElementById("jurors");
+const verdict = document.getElementById("verdict");
+const cards = ["customer", "engineer", "investor"].map(id => document.getElementById(id));
+
+function setStatus(text, isError = false) {
+  status.textContent = text;
+  status.className = isError ? "error" : "";
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const text = idea.value.trim();
+  if (!text) return;
+  send.disabled = true;
+  verdict.classList.remove("show");
+  jurors.hidden = false;
+  for (const card of cards) {
+    card.classList.add("waiting");
+    card.querySelector("p").textContent = "Thinking…";   // textContent only: answers are untrusted text
+  }
+  setStatus("The jury is discussing your idea. This takes about 30 seconds.");
+  try {
+    const response = await fetch("/api/judge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idea: text }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "The backend returned an error.");
+
+    for (const card of cards) {
+      const juror = (data.jurors || []).find(j => j.name.toLowerCase() === card.id);
+      card.classList.remove("waiting");
+      card.querySelector("p").textContent = juror ? juror.opinion : "This juror was not asked.";
+    }
+    const score = document.getElementById("score");
+    score.className = data.score == null ? "" : data.score >= 7 ? "good" : data.score >= 4 ? "mid" : "bad";
+    score.textContent = data.score == null ? "–" : data.score;
+    const outOf = document.createElement("small");
+    outOf.textContent = "out of 10";
+    score.append(outOf);
+    document.getElementById("verdict-text").textContent = data.verdict;
+    verdict.classList.add("show");
+    setStatus("The jury has decided.");
+  } catch (error) {
+    jurors.hidden = true;
+    setStatus(error.message, true);
+  } finally {
+    send.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
