@@ -35,6 +35,30 @@ macOS: `brew install python azure-cli`
 Each script has `PROJECT_ENDPOINT` at the top. Find your value in the Foundry portal:
 your project → Overview → Project endpoint.
 
+## Use a coding agent (Claude Code, Codex, GitHub Copilot)
+
+After `az login`, a coding agent that runs in your terminal can work with your Foundry project
+through the same login.
+
+1. Sign in once: `az login`
+2. Start the coding agent in this folder
+3. Tell it what you want, for example:
+
+```text
+I am signed in with az login.
+My Foundry project endpoint is <your endpoint>.
+Run code/a2a_lab.py and explain each step to me.
+```
+
+Why this is better than giving the agent a key:
+
+- No API keys in the chat or in the code
+- The agent works as you: it can do what you are allowed to do, and nothing more
+- Changes in Azure are logged under your name
+- `az logout` ends its access
+
+The agent changes real resources. Read each command before you approve it.
+
 ## Knowledge file or skill?
 
 | File           | Contains                            | The agent uses it to answer | Example                         |
