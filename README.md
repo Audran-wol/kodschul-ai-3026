@@ -10,6 +10,7 @@ The files used in the live demos and labs of the seminar. The example company is
 | `knowledge/` | `kodschul_agent_knowledge_source.pdf` | Knowledge file: facts the agent searches (upload to Foundry IQ) | 02 Knowledge       |
 | `skills/`    | `support-reply/SKILL.md`              | Skill file: steps for one task (attach to a toolbox, preview)  | Knowledge vs skill |
 | `openapi/`   | `course-availability.json`            | OpenAPI definition of the tool `CourseAvailability` for KodschulAssistant | 03 Tools |
+| `openapi/`   | `exchange-rate.json`                  | OpenAPI definition of a public exchange-rate API (Frankfurter) | 03 Tools           |
 | `openapi/`   | `todo-lookup.json`                    | OpenAPI definition of a second demo tool, `TodoLookup`         | 04 MCP             |
 | `api/`       | `courses/<code>/availability.json`    | Sample data served as a small demo API                         | 03 Tools           |
 | `code/`      | `run_agent.py`                        | Call an existing agent from Python and print every step        | 05 Code            |

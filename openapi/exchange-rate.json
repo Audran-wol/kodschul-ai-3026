@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Frankfurter Exchange Rate API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.frankfurter.dev"
+    }
+  ],
+  "paths": {
+    "/v2/rate/{base}/{quote}": {
+      "get": {
+        "operationId": "getExchangeRate",
+        "summary": "Get the latest exchange rate between two currencies",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "required": true,
+            "description": "Base currency code such as EUR or USD",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quote",
+            "in": "path",
+            "required": true,
+            "description": "Target currency code such as USD or GBP",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest exchange rate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string"
+                    },
+                    "base": {
+                      "type": "string"
+                    },
+                    "quote": {
+                      "type": "string"
+                    },
+                    "rate": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
