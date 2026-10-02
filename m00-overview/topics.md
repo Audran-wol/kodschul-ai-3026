@@ -1,0 +1,57 @@
+# Topics
+
+- Kickoff
+  - Participant introduction
+  - Level check
+  - The six-step method
+  - AI primer
+- Module 1: AI Agents on Azure: Fundamentals and Options
+  - Lab 1.1: Agents and options
+    - What an agent is
+    - Script, workflow, agent
+    - Microsoft Foundry and Foundry Agent Service
+    - Azure options and decision axes
+- Module 2: Foundry Agent Service: First Agent and Grounding
+  - Lab 2.1: First Foundry agent
+    - Agent anatomy
+    - Instructions
+    - Testing deliberately
+  - Lab 2.2: Knowledge grounding and citations
+    - Grounding
+    - Citations
+  - Background: Foundry IQ and knowledge at scale
+- Module 3: Agents in Code: VS Code and the Python SDK
+  - Lab 3.1: Agent in VS Code and the Python SDK
+    - Portal agent versus code agent
+    - Foundry extension
+    - Python SDK
+    - Skills and scaffolding
+- Module 4: Agent Tools: Custom Functions and MCP
+  - Lab 4.1: Custom function tools
+    - Function calling
+    - Tool contract
+    - Run trace
+  - Lab 4.2: MCP tools
+    - Model Context Protocol
+    - Toolbox
+    - Local function versus MCP tool
+- Module 5: Multi-Agent Orchestration
+  - Lab 5.1: Connected agents and orchestration
+    - Orchestration patterns
+    - Trust boundary
+    - Handoff
+  - Background: Microsoft Agent Framework
+  - Background: Workflows and Power Fx
+- Module 6: Evaluation, Guardrails, and Integration
+  - Lab 6.1: Test, guard, and human approval
+    - Test cases
+    - Human approval
+    - Observability
+  - Lab 6.2: Integration options and next steps
+    - Paths from here
+    - Transfer note
+  - Background: Publishing to Teams and Work IQ
+  - Background: A2A
+- Closing
+  - Platform thread
+  - Method recap
