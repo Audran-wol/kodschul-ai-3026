@@ -1,0 +1,49 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "CourseAvailability",
+    "description": "Look up how many seats are still available for a Kodschul course. Demo API with sample data.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://raw.githubusercontent.com/Audran-wol/kodschul-ai-3026/main/api" }
+  ],
+  "paths": {
+    "/courses/{courseId}/availability.json": {
+      "get": {
+        "operationId": "getCourseAvailability",
+        "summary": "Get the date and the number of available seats for one course.",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "description": "The course code in upper case, for example AI-3026, AI-900 or AZ-104.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The course and its available seats.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "course": { "type": "string" },
+                    "title": { "type": "string" },
+                    "date": { "type": "string" },
+                    "availableSeats": { "type": "integer" },
+                    "totalSeats": { "type": "integer" },
+                    "format": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "No course with this code." }
+        }
+      }
+    }
+  }
+}
